@@ -18,7 +18,8 @@ return array(
 	 *
 	 */
 
-	'_root_' => 'welcome/index',
+	// '_root_' => 'welcome/index',
+	'_root_' => 'pandachord/index',
 
 	/**
 	 * -------------------------------------------------------------------------

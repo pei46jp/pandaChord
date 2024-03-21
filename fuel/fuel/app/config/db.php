@@ -20,6 +20,43 @@
  *
  */
 
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 return array(
 
+    'development' => array(
+        'type'          => 'pdo',
+        'connection'    => array(
+            'dsn'           => 'pgsql:host=' . $_ENV['DB_HOST'] . ';port=' . $_ENV['DB_PORT'] . ';dbname=' . $_ENV['DB_NAME'],
+            // 'dsn'           => 'pgsql:host=localhost;port=' . $_ENV['DB_PORT'] . ';dbname=' . $_ENV['DB_NAME'],
+            'username'      => $_ENV['DB_USER'],
+            'password'      => $_ENV['DB_PW'],
+            'persistent'    => false,
+            'compress'      => false,
+        ),
+        'identifier'    => '"',
+        'table_prefix'  => '',
+        'charset'       => 'utf8',
+        'enable_cache'  => true,
+        'profiling'     => false,
+        'readonly'      => false,
+    ),
+
+    'production' => array(
+        'type'          => 'pdo',
+        'connection'    => array(
+            'dsn'           => 'pgsql:host=' . $_ENV['DB_HOST'] . ';port=' . $_ENV['DB_PORT'] . ';dbname=' . $_ENV['DB_NAME'],
+            'username'      => $_ENV['DB_USER'],
+            'password'      => $_ENV['DB_PW'],
+            'persistent'    => false,
+            'compress'      => false,
+        ),
+        'identifier'    => '"',
+        'table_prefix'  => '',
+        'charset'       => 'utf8',
+        'enable_cache'  => true,
+        'profiling'     => false,
+        'readonly'      => false,
+    ),
 );
