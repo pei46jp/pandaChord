@@ -9,9 +9,26 @@ use Fuel\Core\View;
         public function action_index() {
             // create the view object
             $view = View::forge('pandachord/index');
-
-            // set the template variables
-            $this->template->title = "PandaChord";
+            $view->set('pageTitle', 'pandaChord Home', true);
             $this->template->content = $view;
         }
+
+        public function action_song() {
+            $view = View::forge('pandachord/song');
+            $view->set('pageTitle', 'Chord and Lyrics', true);
+            $this->template->content = $view;
+        }
+
+        public function action_tag() {
+            $view = View::forge('pandachord/tag');
+            $view->set('pageTitle', '#tagName', true);
+            $this->template->content = $view;
+        }
+
+        public function action_create_chord() {
+            $view = View::forge('pandachord/create_chord');
+            $view->set('pageTitle', 'Create Original Chord', true);
+            $this->template->content = $view;
+        }
+
     }
