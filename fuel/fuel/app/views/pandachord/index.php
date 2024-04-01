@@ -4,9 +4,13 @@
         <div class="col-sm-10">
             <div class="container">
                 <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action">ao pajama</a>
-                    <a href="#" class="list-group-item list-group-item-action">handakuten</a>
-                    <a href="#" class="list-group-item list-group-item-action">Shirasu</a>
+                    <?php
+                        foreach($data['artists'] as $artist) {
+                    ?>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <?php echo $artist['artist_name']; ?>
+                    </a>
+                    <?php } ?>
                 </div>
             </div>
         </div>
