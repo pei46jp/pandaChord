@@ -10,10 +10,10 @@ use Fuel\Core\Uri;
             <div class="container">
                 <div class="list-group">
                     <?php
-                        foreach($data['artists'] as $artist) {
+                        foreach($data['songs'] as $song) {
                     ?>
-                    <a href="<?php echo Uri::create('pandachord/artist/'.$artist['artist_name']); ?>" class="list-group-item list-group-item-action">
-                        <?php echo $artist['artist_name']; ?>
+                    <a href="<?php echo Uri::create('pandachord/song/'.$song['id']); ?>" class="list-group-item list-group-item-action">
+                        <?php echo $song['title']; ?>
                     </a>
                     <?php } ?>
                 </div>

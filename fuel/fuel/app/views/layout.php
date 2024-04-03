@@ -1,5 +1,7 @@
 <?php
 use Fuel\Core\Asset;
+use Fuel\Core\Uri;
+
 ?>
 
 <!DOCTYPE html>
@@ -17,10 +19,25 @@ use Fuel\Core\Asset;
         <header>
             <nav class="navbar navbar-expand-lg navbar-light py-3" style="background-color: #008F7E;">
                 <div class="container-fluid">
-                    <a class="navbar-brand" href="#">PandaChord</a>
+                    <a class="navbar-brand" href="<?php echo Uri::create('pandachord/'); ?>">PandaChord</a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
+                    <div class="collapse navbar-collapse me-auto" id="navbarNav">
+                        <ul class='navbar-nav me-auto mb-2 mb-lg-0'>
+                            <li class="nav-item">
+                                <a class="nav-link" href="<?php echo Uri::create('pandachord'); ?>">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="<?php echo Uri::create('pandachord/create_chord'); ?>">Create Chord</a>
+                            </li>
+                        </ul>
+                        <ul class='navbar-nav mb-2 mb-lg-0'>
+                            <li class="nav-item">
+                                <a class="nav-link" href="">- panda chord -</a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </nav>
         </header>
