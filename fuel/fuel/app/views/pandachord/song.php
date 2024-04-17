@@ -3,6 +3,7 @@
 use Fuel\Core\Uri;
 
 ?>
+<a class="btn btn-outline-secondary" href="<?php echo Uri::create('pandachord/artist/'.$data['songs']['artist_name']); ?>">< <?php echo $data['songs']['artist_name']?></a>
 <h2 class="pt-4 text-center"><?php echo $data['songs']['title'] ?></h2>
 <h3 class="pt-2 text-center"><?php echo $data['songs']['artist_name'] ?></h3>
 <div class="container py-3 my-5">

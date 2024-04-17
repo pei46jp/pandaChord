@@ -57,6 +57,9 @@ use Fuel\Core\View;
         public function get_create_chord() {
             $view = View::forge('pandachord/create_chord');
             $view->set('pageTitle', 'Create Original Chord', true);
+
+            $action = 'pandachord/create_chord';
+            $view->set('action', $action);
             
             // $artists = array('test', 'test2', 'test3');
             $data = array();
@@ -108,47 +111,20 @@ use Fuel\Core\View;
             Response::redirect('pandachord/song/'.$latest_id);
         }
 
-        public function action_edit($id) {
-            $song = Model_Songs::find($id);
-
-            if (Input::method() == 'POST') {
-                $val = Model_Songs::validate('edit');
-                
-                if ($val->run()) {
-                    $song->title = Input::post('title');
-                    $song->artist_name = Input::post('artist_name');
-                    $song->lyrics = Input::post('lyrics');
-                    $song->chord = Input::post('chord');
-                    $song->memo = Input::post('memo');
-
-                    $existing_artist = Model_Artists::find('first', array(
-                        'where' => array(
-                            array('artist_name', '=', $song['artist_name'])
-                        )
-                    ));
-        
-                    if (!$existing_artist) {
-                        $new_artist = Model_Artists::forge(array(
-                            'artist_name' => $song['artist_name']
-                        ));
-                        $new_artist->save();
-                    }
-
-                    if ($song->save()) {
-                        Response::redirect('pandachord/song/'.$id);
-                    } else {
-                        // データ保存に失敗した場合はエラーメッセージを表示
-                        Session::set_flash('error', 'Failed to save song.');
-                    }
-                }else {
-                    // バリデーションエラーがある場合はエラーメッセージを表示
-                    Session::set_flash('error', $val->error());
-                }
+        public function get_edit($id) {
+            if (isset($id)) {
+                $action = 'pandachord/edit/'.$id;
+            } else {
+                $action = 'pandachord/create_chord';
             }
+
+            $song = Model_Songs::find($id);
 
             $view = View::forge('pandachord/create_chord');
             $view->set('pageTitle', 'Edit Chord', true);
             $view->set('song', $song);
+            $view->set('action', $action);
+            // Log::error(print_r($song), true);
 
             $data = array();
             $data['artists'] = Model_Artists::find('all');
@@ -158,6 +134,39 @@ use Fuel\Core\View;
             $view->set('artist_names', $artist_names);
 
             $this->template->content = $view;
+
+        }
+
+        public function post_edit($id) {
+            $song = Model_Songs::find($id);
+            $edited = array(
+                'title' => Input::post('title'),
+                'artist_name' => Input::post('artist_name'),
+                'lyrics' => Input::post('lyrics'),
+                'chord' => Input::post('chord'),
+                'memo' => Input::post('memo'),
+            );
+
+            $existing_artist = Model_Artists::find('first', array(
+                'where' => array(
+                    array('artist_name', '=', $edited['artist_name'])
+                )
+            ));
+
+            if (!$existing_artist) {
+                $new_artist = Model_Artists::forge(array(
+                    'artist_name' => $edited['artist_name']
+                ));
+                $new_artist->save();
+            }
+
+            $song->set($edited);
+
+            // $song->save();
+            if ($song->save()) {
+                // Log::error('save success');
+                Response::redirect('pandachord/song/'.$id);
+            }
         }
 
     }

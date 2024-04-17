@@ -1,6 +1,6 @@
 <?php
 use Fuel\Core\Form;
-echo Form::open(array('action' => 'pandachord/create_chord', 'method' => 'post'));
+echo Form::open(array('action' => $action, 'method' => 'post'));
 ?>
 
 <h2 class="pt-4 pb-4 mb-4 text-center"><?php echo $pageTitle; ?></h2>
