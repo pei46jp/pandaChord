@@ -27,6 +27,7 @@ use Fuel\Core\Uri;
                         <p><?php echo nl2br($data['songs']['memo']) ?></p>
                     </div>
                     <a class="btn btn-secondary" href="<?php echo Uri::create('pandachord/edit/'.$data['songs']['id']); ?>">Edit</a>
+                    <a class="btn btn-danger my-3" href="<?php echo Uri::create('pandachord/delete_song/'.$data['songs']['id']); ?>">Delete this song.</a>
                 </div>
             </div>
         </div>

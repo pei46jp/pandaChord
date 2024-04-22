@@ -3,6 +3,7 @@
 use Fuel\Core\Uri;
 
 ?>
+<a class="btn btn-outline-secondary" href="<?php echo Uri::create('pandachord/index/'); ?>">< List</a>
 <h2 class="pt-4 text-center"><?php echo $pageTitle; ?></h2>
 <div class="container py-3 my-5">
     <div class="row">

@@ -1,6 +1,7 @@
 <?php
 
 use Fuel\Core\Controller_Template;
+use Fuel\Core\DB;
 use Fuel\Core\Input;
 use Fuel\Core\Response;
 use Fuel\Core\Session;
@@ -48,6 +49,21 @@ use Fuel\Core\View;
             $this->template->content = $view;
         }
 
+        public function action_delete_song($id) {
+            $song = Model_Songs::find($id);
+            $mem_artist = $song['artist_name'];
+
+            if (!$song) {
+                Session::set_flash('error', 'Song not found.');
+                Response::redirect('pandachord/artist/'.$mem_artist);
+            }
+
+            DB::delete('songs')->where('id', '=', $id)->execute();
+
+            Session::set_flash('success', 'Deleted');
+            Response::redirect('pandachord/artist/'.$mem_artist);
+        }
+
         public function action_tag() {
             $view = View::forge('pandachord/tag');
             $view->set('pageTitle', '#tagName', true);
@@ -70,10 +86,10 @@ use Fuel\Core\View;
             $view->set('artist_names', $artist_names);
 
             $default = array(
-                'title' => '',
-                'artist_name' => '',
-                'lyrics' => '',
-                'chord' => '',
+                'title' => 'Untitled',
+                'artist_name' => 'Unknown',
+                'lyrics' => 'Type Lyrics',
+                'chord' => 'Create Chord',
                 'memo' => ''
             );
 

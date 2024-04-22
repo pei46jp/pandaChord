@@ -25,7 +25,7 @@ $dotenv->load();
 
 return array(
 
-    'development' => array(
+    'default' => array(
         'type'          => 'pdo',
         'connection'    => array(
             'dsn'           => 'pgsql:host=' . $_ENV['DB_HOST'] . ';port=' . $_ENV['DB_PORT'] . ';dbname=' . $_ENV['DB_NAME'],
