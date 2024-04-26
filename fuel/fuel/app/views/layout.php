@@ -33,9 +33,13 @@ use Fuel\Core\Uri;
                             </li>
                         </ul>
                         <ul class='navbar-nav mb-2 mb-lg-0'>
-                            <li class="nav-item">
-                                <a class="nav-link" href="">- panda chord -</a>
-                            </li>
+                            <?php 
+                                foreach ($nav_info as $nav) {
+                                    echo '<li class="nav-item">';
+                                    echo '<a class="nav-link" href="'. $nav[1] .'">'. $nav[0].'</a>';
+                                    echo '</li>';
+                                }
+                            ?>
                         </ul>
                     </div>
                 </div>

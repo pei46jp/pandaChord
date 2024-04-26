@@ -1,14 +1,124 @@
 <?php
 
+use Auth\Auth;
 use Fuel\Core\Controller_Template;
 use Fuel\Core\DB;
 use Fuel\Core\Input;
 use Fuel\Core\Response;
 use Fuel\Core\Session;
+use Fuel\Core\Uri;
 use Fuel\Core\View;
 
     class Controller_Pandachord extends Controller_Template{
         public $template = 'layout';
+
+        public function get_register() {
+            $view = View::forge('auth/register');
+            $view->set('pageTitle', 'Sign Up', true);
+
+            $action = 'pandachord/register';
+            $view->set('action', $action);
+
+            $this->template->content = $view;
+        }
+        public function post_register() {
+            if (Input::method() == 'POST') {
+                $username = Input::post('username');
+                $password = Input::post('password');
+                $email = Input::post('email');
+                if (empty($email)) {
+                    $email = $username.'@nothing.com';
+                }
+                if (empty($username) || empty($password)) {
+                    Session::set_flash('message', '入力が足りません');
+                }
+
+                try {
+                    Auth::create_user($username, $password, $email, 1);
+                    Response::redirect('pandachord/login');
+                } catch (Exception $e) {
+                    Session::set_flash('message', $e->getMessage());
+                    Response::redirect('pandachord/register');
+                }
+            }
+        }
+
+        public function get_login() {
+            $view = View::forge('auth/login');
+            $view->set('pageTitle', 'Log In', true);
+
+            $action = 'pandachord/login';
+            $view->set('action', $action);
+
+            $this->template->content = $view;
+        }
+        public function post_login() {
+            if (Input::method() == 'POST') {
+                $username = Input::post('username');
+                $password = Input::post('password');
+                if (empty($username) || empty($password)) {
+                    Session::set_flash('message', '入力が足りません');
+                }
+                try {
+                    Auth::login($username, $password);
+                    Response::redirect('pandachord/index');
+                } catch (Exception $e) {
+                    Session::set_flash('message', $e->getMessage());
+                    Response::redirect('pandachord/login');
+                }
+            }
+        }
+
+        public function get_logout() {
+            $view = View::forge('auth/logout');
+            $view->set('pageTitle', 'Log out', true);
+
+            $action = 'pandachord/logout';
+            $view->set('action', $action);
+
+            $this->template->content = $view;
+        }
+        public function post_logout() {
+            if (Input::method() == 'POST') {
+                try {
+                    Auth::logout();
+                    Response::redirect('pandachord/index');
+                } catch (Exception $e) {
+                    Session::set_flash('message', $e->getMessage());
+                    Response::redirect('pandachord/logout');
+                }
+            }
+        }
+
+        public function before() {
+            parent::before();
+
+            if (Auth::check()) {
+                $right_nav = array(
+                    array(
+                        Auth::get_screen_name(),
+                        Uri::create('pandachord/index/')
+                    ),
+                    array(
+                        'logout',
+                        Uri::create('pandachord/logout/')
+                    )
+                );
+            } else {
+                $right_nav = array(
+                    array(
+                        'Sign Up',
+                        Uri::create('pandachord/register')
+                    ),
+                    array(
+                        'Log in',
+                        Uri::create('pandachord/login/')
+                    )
+                );
+            }
+
+            $this->template->set_global('nav_info', $right_nav);
+        }
 
         public function action_index() {
             // create the view object
@@ -17,6 +127,7 @@ use Fuel\Core\View;
 
             $data = array();
             $data['artists'] = Model_Artists::find('all');
+            $data['tags'] = Model_Tags::find('all');
             $view->set('data', $data);
 
             $this->template->content = $view;
@@ -33,6 +144,8 @@ use Fuel\Core\View;
                 ),
                 'order_by' => array ('id' => 'desc'),
             ));
+            $data['tags'] = Model_Tags::find('all');
+
             $view->set('data', $data);
 
             $this->template->content = $view;
@@ -84,6 +197,9 @@ use Fuel\Core\View;
                 $artist_names[$artist['id']] = $artist['artist_name'];
             }
             $view->set('artist_names', $artist_names);
+
+            $tags = DB::select('tag_name')->from('tags')->execute();
+            $view->set('tags', $tags);
 
             $default = array(
                 'title' => 'Untitled',
@@ -141,6 +257,10 @@ use Fuel\Core\View;
             $view->set('song', $song);
             $view->set('action', $action);
             // Log::error(print_r($song), true);
+
+            $tags = DB::select('tag_name')->from('tags')->execute();
+            // Log::error(print_r($tags, true));
+            $view->set('tags', $tags);
 
             $data = array();
             $data['artists'] = Model_Artists::find('all');

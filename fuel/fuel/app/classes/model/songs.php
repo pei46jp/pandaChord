@@ -7,6 +7,18 @@ use Orm\Model;
         protected static $_connection = "production";
         protected static $_table_name = "songs";
         protected static $_primary_key = array('id');
+        protected static $_observers = array(
+            'Orm\\Observer_CreatedAt' => array(
+                'events' => array('before_insert'),
+                'mysql_timestamp' => true,
+                'property' => 'created_at',
+            ),
+            'Orm\\Observer_UpdatedAt' => array(
+                'events' => array('before_save'),
+                'mysql_timestamp' => true,
+                'property' => 'updated_at',
+            )
+        );
         protected static $_properties = array(
             'id',
             'title' => array(
@@ -50,15 +62,9 @@ use Orm\Model;
                 'data_type' => 'int',
                 'label' => 'Publication',
             ),
-            'created_at' => array(
-                'data_type' => 'datetime'
-            ),
-            'updated_at' => array(
-                'data_type' => 'datetime'
-            ),
-            'deleted_at' => array(
-                'data_type' => 'datetime'
-            )
+            'created_at',
+            'updated_at',
+            'deleted_at'
         );
 
         protected static $_soft_delete = array(
@@ -77,17 +83,4 @@ use Orm\Model;
                 'key_to' => 'id',
             ),
         );
-        
-        protected static function _pre_insert($data) {
-
-            $data['created_at'] = Date::forge()->get_timestamp();
-            $data['updated_at'] = Date::forge()->get_timestamp();
-
-            return $data;
-        }
-
-        protected static function _pre_update($data) {
-            $data['updated_at'] = Date::forge()->get_timestamp();
-            return $data;
-        }
     }

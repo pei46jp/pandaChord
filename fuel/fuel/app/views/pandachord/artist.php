@@ -26,20 +26,16 @@ use Fuel\Core\Uri;
                     <div class="col-xs-12">
                         <p>Search Space</p>
                     </div>
-                    <div class="col-xs-12">
-                        <p>#tag</p>
-                    </div>
-                    <div class="col-xs-12">
-                        <p>#tag</p>
-                    </div>
-                    <div class="col-xs-12">
-                        <p>#tag</p>
-                    </div>
-                    <div class="col-xs-12">
-                        <p>Detail Infos</p>
-                    </div>
-                    <div class="col-xs-12">
-                        <p>More Function</p>
+                    <div class="container my-2" class="col-xs-12">
+                        <div class="list-group">
+                        <?php
+                            foreach($data['tags'] as $tag) {
+                        ?>
+                        <a href="<?php echo Uri::create('pandachord/tags/'.$tag['tag_name']); ?>" class="list-group-item list-group-item-action">
+                            # <?php echo $tag['tag_name']; ?>
+                        </a>
+                        <?php } ?>
+                        </div>
                     </div>
                 </div>
             </div>

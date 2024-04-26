@@ -7,6 +7,22 @@ use Orm\Model;
         protected static $_connection = "production";
         protected static $_table_name = "artists";
         protected static $_primary_key = array('id');
+        protected static $_observers = array(
+            'Orm\\Observer_CreatedAt' => array(
+                'events' => array('before_insert'),
+                'mysql_timestamp' => true,
+                // 'mysql_timestamp' => false,
+                'property' => 'created_at',
+                // 'datatype' => 'datetime',
+            ),
+            'Orm\\Observer_UpdatedAt' => array(
+                'events' => array('before_save'),
+                'mysql_timestamp' => true,
+                // 'mysql_timestamp' => false,
+                'property' => 'updated_at',
+                // 'datatype' => 'datetime',
+            )
+        );
         protected static $_properties = array(
             'id',
             'artist_name' => array(
@@ -17,29 +33,12 @@ use Orm\Model;
                     'max_length' => array(50)
                 ),
             ),
-            'created_at' => array(
-                'data_type' => 'datetime'
-            ),
-            'updated_at' => array(
-                'data_type' => 'datetime'
-            ),
-            'deleted_at' => array(
-                'data_type' => 'datetime'
-            )
+            'created_at',
+            'updated_at',
+            'deleted_at'
         );
 
         protected static $_soft_delete = array(
             'deleted_field' => 'deleted_at'
         );
-        
-        protected static function _pre_insert($data) {
-            $data['created_at'] = Date::time()->format('%Y-%m-%d %H:%M:%S');
-            $data['updated_at'] = Date::time()->format('%Y-%m-%d %H:%M:%S');
-            return $data;
-        }
-
-        protected static function _pre_update($data) {
-            $data['updated_at'] = Date::time()->format('%Y-%m-%d %H:%M:%S');
-            return $data;
-        }
     }

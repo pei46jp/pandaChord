@@ -67,8 +67,23 @@ echo Form::open(array('action' => $action, 'method' => 'post'));
                             echo Form::textarea('memo', $song['memo'], array('class' => 'form-control', 'rows' => 10));
                         ?>
                     </div>
-                    <?php echo Form::button('frmbutton', 'Submit', array('class' => 'btn btn-secondary')); ?>
-                    <?php echo Form::close() ?>
+                    <div class="py-4 col-xs-12">
+                        <?php
+                            foreach ($tags as $_tag) {
+                                $tag = $_tag['tag_name'];
+                                echo Form::checkbox('tags[]', $tag, false, array('id' => $tag));
+                                echo Form::label($tag, $tag);
+                                echo '<br>';
+                            }
+                        ?>
+                    </div>
+                    <div class="col-sm-12">
+                        <?php
+                            echo Form::button('frmbutton', 'Submit', array('class' => 'btn btn-secondary'));
+                        ?>
+
+                        <?php echo Form::close() ?>
+                    </div>
                 </div>
             </div>
         </div>

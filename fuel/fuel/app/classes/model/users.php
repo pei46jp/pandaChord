@@ -7,9 +7,21 @@ use Orm\Model;
         protected static $_connection = "production";
         protected static $_table_name = "users";
         protected static $_primary_key = array('id');
+        protected static $_observers = array(
+            'Orm\\Observer_CreatedAt' => array(
+                'events' => array('before_insert'),
+                'mysql_timestamp' => true,
+                'property' => 'created_at',
+            ),
+            'Orm\\Observer_UpdatedAt' => array(
+                'events' => array('before_save'),
+                'mysql_timestamp' => true,
+                'property' => 'updated_at',
+            )
+        );
         protected static $_properties = array(
             'id',
-            'user_name' => array(
+            'username' => array(
                 'data_type' => 'varchar',
                 'label' => 'User Name',
                 'validation' => array(
@@ -24,29 +36,18 @@ use Orm\Model;
                     'max_length' => array(255)
                 ),
             ),
-            'created_at' => array(
-                'data_type' => 'datetime'
+            'email' => array(
+                'data_type' => 'varchar',
+                'label' => 'Email'
             ),
-            'updated_at' => array(
-                'data_type' => 'datetime'
+            'group' => array(
+                'data_type' => 'varchar',
+                'label' => 'group'
             ),
-            'deleted_at' => array(
-                'data_type' => 'datetime'
-            )
+            'last_login',
+            'login_hash',
+            'profile_fields',
+            'created_at',
+            'updated_at',
         );
-
-        protected static $_soft_delete = array(
-            'deleted_field' => 'deleted_at'
-        );
-        
-        protected static function _pre_insert($data) {
-            $data['created_at'] = Date::forge()->get_timestamp();
-            $data['updated_at'] = Date::forge()->get_timestamp();
-            return $data;
-        }
-
-        protected static function _pre_update($data) {
-            $data['updated_at'] = Date::forge()->get_timestamp();
-            return $data;
-        }
     }
