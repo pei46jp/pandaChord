@@ -155,9 +155,12 @@ use Fuel\Core\View;
             $view = View::forge('pandachord/song');
             // $view->set('pageTitle', 'Chord and Lyrics', true);
 
-            $data = array();
-            $data['songs'] = Model_Songs::find($id);
-            $view->set('data', $data);
+            // $data = array();
+            // $data['songs'] = Model_Songs::find($id);
+            // $view->set('data', $data);
+
+            $song = Model_Songs::find($id);
+            $view->set('song', $song);
 
             $this->template->content = $view;
         }
