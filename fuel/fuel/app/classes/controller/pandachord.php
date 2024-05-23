@@ -180,9 +180,26 @@ use Fuel\Core\View;
             Response::redirect('pandachord/artist/'.$mem_artist);
         }
 
-        public function action_tag() {
+        public function action_tag($tag) {
             $view = View::forge('pandachord/tag');
-            $view->set('pageTitle', '#tagName', true);
+            // $view->set('pageTitle', '#tagName', true);
+
+            $data = array();
+            $data['pageTitle'] = $tag;
+
+            $tags = Model_Tags::find('all');
+            $data['tags'] = array_map(function($tg) {
+                return $tg->to_array();
+            }, $tags);
+
+            $songs = Model_Songs::find('all');
+            $songs_ = array_map(function($sng) {
+                return $sng->to_array();
+            }, $songs);
+            $data['songs'] = array_values($songs_);
+
+            $view->set('data', $data);
+
             $this->template->content = $view;
         }
 
