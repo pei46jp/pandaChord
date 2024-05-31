@@ -533,8 +533,9 @@ return array(
 		// 'language' => array(),
 	// ),
 	'always_load' => array ( 
-		'packages' => array ( 
-		   'orm' 
+		'packages' => array (
+			'auth',
+			'orm' 
 		), 
 	),
 );
