@@ -1,12 +1,19 @@
 import React, {useEffect, useState} from "react";
 import SongCard from "./SongCard";
 import TagList from "./TagList";
+import { useParams } from "react-router-dom";
 
 
-const Tag = ({ pageTitle: initialPageTitle, tags: initialTags, songs: initialSongs }) => {
-    const [pageTitle, setPageTitle] = useState(initialPageTitle);
+const Tag = ({ initialTags, initialSongs }) => {
+    const { tagName } = useParams();
+    // const [pageTitle, setPageTitle] = useState(initialPageTitle);
+    const [pageTitle, setPageTitle] = useState(tagName);
     const [tags, setTags] = useState(initialTags);
     const [songs, setSongs] = useState(initialSongs);
+
+    useEffect(() => {
+        setPageTitle(tagName);
+    }, [tagName]);
 
     // console.log('pageTitle', pageTitle);
     // console.log('tags', Array.isArray(tags), tags);
