@@ -4,6 +4,7 @@ use Auth\Auth;
 use Fuel\Core\Controller_Template;
 use Fuel\Core\DB;
 use Fuel\Core\Input;
+use Fuel\Core\Log;
 use Fuel\Core\Response;
 use Fuel\Core\Session;
 use Fuel\Core\Uri;
@@ -192,11 +193,15 @@ use Fuel\Core\View;
                 return $tg->to_array();
             }, $tags);
 
-            $songs = Model_Songs::find('all');
-            $songs_ = array_map(function($sng) {
-                return $sng->to_array();
-            }, $songs);
-            $data['songs'] = array_values($songs_);
+            $tag_id = DB::select('id')->from('tags')->where('tag_name', '=', $tag)->execute()->current();
+            $song_ids = DB::select('song_id')->from('have_tags')->where('tag_id', '=', $tag_id)->execute()->current();
+            if (!empty($song_ids)) {
+                $songs = DB::select()->from('songs')->where('id', 'in', $song_ids)->execute()->as_array();
+            } else {
+                $songs = [];
+                Session::set_flash("No data in #" . $tag);
+            }
+            $data['songs'] = array_values($songs);
 
             $view->set('data', $data);
 
@@ -260,6 +265,36 @@ use Fuel\Core\View;
             $model->save();
 
             $latest_id = $model->id;
+
+            $selected_tags = Input::post('tags', array());
+
+            try {
+                if (is_array($selected_tags) && !empty($selected_tags)) {
+                    foreach ($selected_tags as $tag) {
+                        $tag_id = DB::select('id')->from('tags')->where('tag_name', '=', $tag)->execute()->current();
+                        if ($tag_id) {
+                            $add_tag = array(
+                                'tag_id' => $tag_id['id'],
+                                'song_id' => $latest_id,
+                            );
+
+                            $haveTag = new Model_HaveTags();
+                            $haveTag->tag_id = $add_tag['tag_id'];
+                            $haveTag->song_id = $add_tag['song_id'];
+                            $haveTag->save();
+                        } else {
+                            Log::error('tag not found: ' . $tag);
+                        }
+                    }
+                } else {
+                    Log::error('selected tags are null or empty');
+                }
+            } catch (Exception $e) {
+                Log::error('An error occurred:' . $e->getMessage());
+                throw $e;
+            }
+
+            
             Response::redirect('pandachord/song/'.$latest_id);
         }
 

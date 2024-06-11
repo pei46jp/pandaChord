@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from "react";
+import axios from 'axios';
 import SongCard from "./SongCard";
 import TagList from "./TagList";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 
 const Tag = ({ initialTags, initialSongs }) => {
@@ -12,8 +13,22 @@ const Tag = ({ initialTags, initialSongs }) => {
     const [songs, setSongs] = useState(initialSongs);
 
     useEffect(() => {
-        setPageTitle(tagName);
+        // setPageTitle(tagName);
+        if (tagName) {
+            fetchSongsByTag(tagName);
+        }
     }, [tagName]);
+
+    const fetchSongsByTag = async (tagName) => {
+        try {
+            const response = await axios.get(`/api/songs_by_tag/${tagName}`);
+            setSongs(response.data);
+            setPageTitle(tagName);
+        } catch (error) {
+            console.log('Error fetching songs:', error);
+            window.alert('No data in #' + tagName);
+        }
+    };
 
     // console.log('pageTitle', pageTitle);
     // console.log('tags', Array.isArray(tags), tags);
