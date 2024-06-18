@@ -163,6 +163,11 @@ use Fuel\Core\View;
             $song = Model_Songs::find($id);
             $view->set('song', $song);
 
+            $addSongUser = $song['user_name'];
+            $loggedInUser = Auth::get_screen_name();
+            $LoggedInCheck = ($addSongUser == $loggedInUser);
+            $view->set('LoggedInCheck', $LoggedInCheck);
+
             $this->template->content = $view;
         }
 
@@ -170,15 +175,24 @@ use Fuel\Core\View;
             $song = Model_Songs::find($id);
             $mem_artist = $song['artist_name'];
 
-            if (!$song) {
-                Session::set_flash('error', 'Song not found.');
+            $loggedInUser = Auth::get_screen_name();
+            $songCreateUser = $song['user_name'];
+
+            if ($loggedInUser == $songCreateUser) {
+                if (!$song) {
+                    Session::set_flash('message', 'Song not found');
+                    Response::redirect('pandachord/song/'.$id);
+                }
+
+                DB::delete('songs')->where('id', '=', $id)->execute();
+
+                Session::set_flash('success', 'Deleted');
                 Response::redirect('pandachord/artist/'.$mem_artist);
+            } else {
+                Session::set_flash('message', 'この楽曲を削除する権限がありません．');
+                Response::redirect('pandachord/song/'.$id);
             }
-
-            DB::delete('songs')->where('id', '=', $id)->execute();
-
-            Session::set_flash('success', 'Deleted');
-            Response::redirect('pandachord/artist/'.$mem_artist);
+            
         }
 
         public function action_tag($tag) {
@@ -209,6 +223,12 @@ use Fuel\Core\View;
         }
 
         public function get_create_chord() {
+
+            if (!Auth::check()) {
+                Session::set_flash('message', 'ユーザ登録及びログインが必要なページです．');
+                Response::redirect('pandachord/login');
+            }
+
             $view = View::forge('pandachord/create_chord');
             $view->set('pageTitle', 'Create Original Chord', true);
 
@@ -240,9 +260,13 @@ use Fuel\Core\View;
         }
 
         public function post_create_chord() {
+
+            $addSongUser = Auth::get_screen_name();
+
             $data = array(
                 'title' => Input::post('title'),
                 'artist_name' => Input::post('artist_name'),
+                'user_name' => $addSongUser,
                 'lyrics' => Input::post('lyrics'),
                 'chord' => Input::post('chord'),
                 'memo' => Input::post('memo'),
