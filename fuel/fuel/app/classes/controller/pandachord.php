@@ -1,11 +1,13 @@
 <?php
 
 use Auth\Auth;
+use Fuel\Core\Config;
 use Fuel\Core\Controller_Template;
 use Fuel\Core\DB;
 use Fuel\Core\Input;
 use Fuel\Core\Log;
 use Fuel\Core\Response;
+use Fuel\Core\Security;
 use Fuel\Core\Session;
 use Fuel\Core\Uri;
 use Fuel\Core\View;
@@ -20,9 +22,20 @@ use Fuel\Core\View;
             $action = 'pandachord/register';
             $view->set('action', $action);
 
+            $token['key'] = Config::get('security.csrf_token_key');
+            $token['token'] = Security::fetch_token();
+            // Log::error('token' . print_r($token, true));
+            $view->set('token', $token);
+
             $this->template->content = $view;
         }
         public function post_register() {
+
+            if (!Security::check_token()) {
+                Session::set_flash('error', 'Token mismatch.');
+                Response::redirect('pandachord/register');
+            }
+
             if (Input::method() == 'POST') {
                 $username = Input::post('username');
                 $password = Input::post('password');
@@ -51,9 +64,20 @@ use Fuel\Core\View;
             $action = 'pandachord/login';
             $view->set('action', $action);
 
+            $token['key'] = Config::get('security.csrf_token_key');
+            $token['token'] = Security::fetch_token();
+            // Log::error('token' . print_r($token, true));
+            $view->set('token', $token);
+
             $this->template->content = $view;
         }
         public function post_login() {
+
+            if (!Security::check_token()) {
+                Session::set_flash('error', 'Token mismatch.');
+                Response::redirect('pandachord/login');
+            }
+
             if (Input::method() == 'POST') {
                 $username = Input::post('username');
                 $password = Input::post('password');
@@ -61,8 +85,12 @@ use Fuel\Core\View;
                     Session::set_flash('message', '入力が足りません');
                 }
                 try {
-                    Auth::login($username, $password);
-                    Response::redirect('pandachord/index');
+                    if (Auth::login($username, $password)) {
+                        Response::redirect('pandachord/index');
+                    } else {
+                        Session::set_flash('message', 'Failed.');
+                        Response::redirect('pandachord/login');
+                    }
                 } catch (Exception $e) {
                     Session::set_flash('message', $e->getMessage());
                     Response::redirect('pandachord/login');
@@ -71,15 +99,27 @@ use Fuel\Core\View;
         }
 
         public function get_logout() {
+
             $view = View::forge('auth/logout');
             $view->set('pageTitle', 'Log out', true);
 
             $action = 'pandachord/logout';
             $view->set('action', $action);
 
+            $token['key'] = Config::get('security.csrf_token_key');
+            $token['token'] = Security::fetch_token();
+            // Log::error('token' . print_r($token, true));
+            $view->set('token', $token);
+
             $this->template->content = $view;
         }
         public function post_logout() {
+
+            if (!Security::check_token()) {
+                Session::set_flash('error', 'Token mismatch.');
+                Response::redirect('pandachord/logout');
+            }
+
             if (Input::method() == 'POST') {
                 try {
                     Auth::logout();
@@ -256,10 +296,20 @@ use Fuel\Core\View;
 
             $view->set('song', $default);
 
+            $token['key'] = Config::get('security.csrf_token_key');
+            $token['token'] = Security::fetch_token();
+            // Log::error('token' . print_r($token, true));
+            $view->set('token', $token);
+
             $this->template->content = $view;
         }
 
         public function post_create_chord() {
+
+            if (!Security::check_token()) {
+                Session::set_flash('error', 'Token mismatch.');
+                Response::redirect('pandachord/create_chord');
+            }
 
             $addSongUser = Auth::get_screen_name();
 

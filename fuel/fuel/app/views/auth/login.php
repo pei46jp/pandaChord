@@ -4,7 +4,12 @@ use Fuel\Core\Form;
 use Fuel\Core\Session;
 
 echo Form::open(array('action' => $action, 'method' => 'post'));
+echo Form::hidden($token['key'], $token['token']);
+
 ?>
+
+<p><?php echo Session::get_flash('error') ?></p>
+
 <h2 class="pt-4 text-center"><?php echo $pageTitle; ?></h2>
 <p><?php echo Session::get_flash('message') ?></p>
 

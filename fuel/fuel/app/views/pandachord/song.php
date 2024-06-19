@@ -101,7 +101,7 @@ use Fuel\Core\Uri;
     };
 
     var baseUrl = "<?php echo Uri::base(); ?>";
-    console.log(baseUrl); 
+    // console.log(baseUrl); 
 
 
     function SongViewModel(initialData, LoggedIn) {
@@ -109,6 +109,7 @@ use Fuel\Core\Uri;
 
         self.song = ko.observable(ko.mapping.fromJS(initialData));
         self.loggedIn = ko.observable(LoggedIn);
+        // console.log(self.loggedIn);
         self.originalData = ko.observable();
         // console.log(self.song());
 
@@ -193,8 +194,8 @@ use Fuel\Core\Uri;
         var initialData = <?php echo json_encode($song->to_array(), JSON_UNESCAPED_UNICODE); ?>;
         // console.log(initialData);
         var LoggedIn = <?php echo json_encode($LoggedInCheck); ?>;
-        // console.log(LoggedIn);
-        var viewModel = new SongViewModel(initialData);
+        console.log(LoggedIn);
+        var viewModel = new SongViewModel(initialData, LoggedIn);
         ko.applyBindings(viewModel, document.getElementById("songDetails"));
     });
 
