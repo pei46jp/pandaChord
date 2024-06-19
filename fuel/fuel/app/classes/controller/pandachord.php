@@ -1,10 +1,13 @@
 <?php
 
 use Auth\Auth;
+use Fuel\Core\Config;
 use Fuel\Core\Controller_Template;
 use Fuel\Core\DB;
 use Fuel\Core\Input;
+use Fuel\Core\Log;
 use Fuel\Core\Response;
+use Fuel\Core\Security;
 use Fuel\Core\Session;
 use Fuel\Core\Uri;
 use Fuel\Core\View;
@@ -19,9 +22,20 @@ use Fuel\Core\View;
             $action = 'pandachord/register';
             $view->set('action', $action);
 
+            $token['key'] = Config::get('security.csrf_token_key');
+            $token['token'] = Security::fetch_token();
+            // Log::error('token' . print_r($token, true));
+            $view->set('token', $token);
+
             $this->template->content = $view;
         }
         public function post_register() {
+
+            if (!Security::check_token()) {
+                Session::set_flash('error', 'Token mismatch.');
+                Response::redirect('pandachord/register');
+            }
+
             if (Input::method() == 'POST') {
                 $username = Input::post('username');
                 $password = Input::post('password');
@@ -50,9 +64,20 @@ use Fuel\Core\View;
             $action = 'pandachord/login';
             $view->set('action', $action);
 
+            $token['key'] = Config::get('security.csrf_token_key');
+            $token['token'] = Security::fetch_token();
+            // Log::error('token' . print_r($token, true));
+            $view->set('token', $token);
+
             $this->template->content = $view;
         }
         public function post_login() {
+
+            if (!Security::check_token()) {
+                Session::set_flash('error', 'Token mismatch.');
+                Response::redirect('pandachord/login');
+            }
+
             if (Input::method() == 'POST') {
                 $username = Input::post('username');
                 $password = Input::post('password');
@@ -60,8 +85,12 @@ use Fuel\Core\View;
                     Session::set_flash('message', '入力が足りません');
                 }
                 try {
-                    Auth::login($username, $password);
-                    Response::redirect('pandachord/index');
+                    if (Auth::login($username, $password)) {
+                        Response::redirect('pandachord/index');
+                    } else {
+                        Session::set_flash('message', 'Failed.');
+                        Response::redirect('pandachord/login');
+                    }
                 } catch (Exception $e) {
                     Session::set_flash('message', $e->getMessage());
                     Response::redirect('pandachord/login');
@@ -70,15 +99,27 @@ use Fuel\Core\View;
         }
 
         public function get_logout() {
+
             $view = View::forge('auth/logout');
             $view->set('pageTitle', 'Log out', true);
 
             $action = 'pandachord/logout';
             $view->set('action', $action);
 
+            $token['key'] = Config::get('security.csrf_token_key');
+            $token['token'] = Security::fetch_token();
+            // Log::error('token' . print_r($token, true));
+            $view->set('token', $token);
+
             $this->template->content = $view;
         }
         public function post_logout() {
+
+            if (!Security::check_token()) {
+                Session::set_flash('error', 'Token mismatch.');
+                Response::redirect('pandachord/logout');
+            }
+
             if (Input::method() == 'POST') {
                 try {
                     Auth::logout();
@@ -162,6 +203,11 @@ use Fuel\Core\View;
             $song = Model_Songs::find($id);
             $view->set('song', $song);
 
+            $addSongUser = $song['user_name'];
+            $loggedInUser = Auth::get_screen_name();
+            $LoggedInCheck = ($addSongUser == $loggedInUser);
+            $view->set('LoggedInCheck', $LoggedInCheck);
+
             $this->template->content = $view;
         }
 
@@ -169,15 +215,24 @@ use Fuel\Core\View;
             $song = Model_Songs::find($id);
             $mem_artist = $song['artist_name'];
 
-            if (!$song) {
-                Session::set_flash('error', 'Song not found.');
+            $loggedInUser = Auth::get_screen_name();
+            $songCreateUser = $song['user_name'];
+
+            if ($loggedInUser == $songCreateUser) {
+                if (!$song) {
+                    Session::set_flash('message', 'Song not found');
+                    Response::redirect('pandachord/song/'.$id);
+                }
+
+                DB::delete('songs')->where('id', '=', $id)->execute();
+
+                Session::set_flash('success', 'Deleted');
                 Response::redirect('pandachord/artist/'.$mem_artist);
+            } else {
+                Session::set_flash('message', 'この楽曲を削除する権限がありません．');
+                Response::redirect('pandachord/song/'.$id);
             }
-
-            DB::delete('songs')->where('id', '=', $id)->execute();
-
-            Session::set_flash('success', 'Deleted');
-            Response::redirect('pandachord/artist/'.$mem_artist);
+            
         }
 
         public function action_tag($tag) {
@@ -192,11 +247,15 @@ use Fuel\Core\View;
                 return $tg->to_array();
             }, $tags);
 
-            $songs = Model_Songs::find('all');
-            $songs_ = array_map(function($sng) {
-                return $sng->to_array();
-            }, $songs);
-            $data['songs'] = array_values($songs_);
+            $tag_id = DB::select('id')->from('tags')->where('tag_name', '=', $tag)->execute()->current();
+            $song_ids = DB::select('song_id')->from('have_tags')->where('tag_id', '=', $tag_id)->execute()->current();
+            if (!empty($song_ids)) {
+                $songs = DB::select()->from('songs')->where('id', 'in', $song_ids)->execute()->as_array();
+            } else {
+                $songs = [];
+                Session::set_flash("No data in #" . $tag);
+            }
+            $data['songs'] = array_values($songs);
 
             $view->set('data', $data);
 
@@ -204,6 +263,12 @@ use Fuel\Core\View;
         }
 
         public function get_create_chord() {
+
+            if (!Auth::check()) {
+                Session::set_flash('message', 'ユーザ登録及びログインが必要なページです．');
+                Response::redirect('pandachord/login');
+            }
+
             $view = View::forge('pandachord/create_chord');
             $view->set('pageTitle', 'Create Original Chord', true);
 
@@ -231,13 +296,27 @@ use Fuel\Core\View;
 
             $view->set('song', $default);
 
+            $token['key'] = Config::get('security.csrf_token_key');
+            $token['token'] = Security::fetch_token();
+            // Log::error('token' . print_r($token, true));
+            $view->set('token', $token);
+
             $this->template->content = $view;
         }
 
         public function post_create_chord() {
+
+            if (!Security::check_token()) {
+                Session::set_flash('error', 'Token mismatch.');
+                Response::redirect('pandachord/create_chord');
+            }
+
+            $addSongUser = Auth::get_screen_name();
+
             $data = array(
                 'title' => Input::post('title'),
                 'artist_name' => Input::post('artist_name'),
+                'user_name' => $addSongUser,
                 'lyrics' => Input::post('lyrics'),
                 'chord' => Input::post('chord'),
                 'memo' => Input::post('memo'),
@@ -260,6 +339,36 @@ use Fuel\Core\View;
             $model->save();
 
             $latest_id = $model->id;
+
+            $selected_tags = Input::post('tags', array());
+
+            try {
+                if (is_array($selected_tags) && !empty($selected_tags)) {
+                    foreach ($selected_tags as $tag) {
+                        $tag_id = DB::select('id')->from('tags')->where('tag_name', '=', $tag)->execute()->current();
+                        if ($tag_id) {
+                            $add_tag = array(
+                                'tag_id' => $tag_id['id'],
+                                'song_id' => $latest_id,
+                            );
+
+                            $haveTag = new Model_HaveTags();
+                            $haveTag->tag_id = $add_tag['tag_id'];
+                            $haveTag->song_id = $add_tag['song_id'];
+                            $haveTag->save();
+                        } else {
+                            Log::error('tag not found: ' . $tag);
+                        }
+                    }
+                } else {
+                    Log::error('selected tags are null or empty');
+                }
+            } catch (Exception $e) {
+                Log::error('An error occurred:' . $e->getMessage());
+                throw $e;
+            }
+
+            
             Response::redirect('pandachord/song/'.$latest_id);
         }
 

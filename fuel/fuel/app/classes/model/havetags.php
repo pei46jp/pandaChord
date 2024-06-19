@@ -6,7 +6,19 @@ use Orm\Model;
     class Model_HaveTags extends Model {
         protected static $_connection = "production";
         protected static $_table_name = "have_tags";
-        protected static $_primary_key = null;
+        protected static $_primary_key = ['tag_id', 'song_id'];
+        protected static $_observers = array(
+            'Orm\\Observer_CreatedAt' => array(
+                'events' => array('before_insert'),
+                'mysql_timestamp' => true,
+                'property' => 'created_at',
+            ),
+            'Orm\\Observer_UpdatedAt' => array(
+                'events' => array('before_save'),
+                'mysql_timestamp' => true,
+                'property' => 'updated_at',
+            )
+        );
         protected static $_properties = array(
             'tag_id' => array(
                 'data_type' => 'int,'
@@ -45,15 +57,4 @@ use Orm\Model;
                 'cascade_delete' => false,
             )
         );
-        
-        protected static function _pre_insert($data) {
-            $data['created_at'] = Date::time()->format('%Y-%m-%d %H:%M:%S');
-            $data['updated_at'] = Date::time()->format('%Y-%m-%d %H:%M:%S');
-            return $data;
-        }
-
-        protected static function _pre_update($data) {
-            $data['updated_at'] = Date::time()->format('%Y-%m-%d %H:%M:%S');
-            return $data;
-        }
     }

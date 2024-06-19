@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import Tag from './components/Tag';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 // FuelPHPのビューから渡されたデータを取得
 const initialData = window.initialData;
@@ -12,7 +12,12 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <Tag {...initialData} />
+      <Routes>
+        <Route
+          path="/pandachord/tag/:tagName"
+          element={<Tag initialTags={initialData.tags} initialSongs={initialData.songs} />}
+        />
+      </Routes>
     </BrowserRouter>
   </React.StrictMode>,
 );
