@@ -22,10 +22,8 @@ use Fuel\Core\View;
             $action = 'pandachord/register';
             $view->set('action', $action);
 
-            $token['key'] = Config::get('security.csrf_token_key');
-            $token['token'] = Security::fetch_token();
-            // Log::error('token' . print_r($token, true));
-            $view->set('token', $token);
+            $token_key = Config::get('security.csrf_token_key');
+            $view->set('token', $token_key);
 
             $this->template->content = $view;
         }
@@ -64,10 +62,8 @@ use Fuel\Core\View;
             $action = 'pandachord/login';
             $view->set('action', $action);
 
-            $token['key'] = Config::get('security.csrf_token_key');
-            $token['token'] = Security::fetch_token();
-            // Log::error('token' . print_r($token, true));
-            $view->set('token', $token);
+            $token_key = Config::get('security.csrf_token_key');
+            $view->set('token', $token_key);
 
             $this->template->content = $view;
         }
@@ -106,10 +102,8 @@ use Fuel\Core\View;
             $action = 'pandachord/logout';
             $view->set('action', $action);
 
-            $token['key'] = Config::get('security.csrf_token_key');
-            $token['token'] = Security::fetch_token();
-            // Log::error('token' . print_r($token, true));
-            $view->set('token', $token);
+            $token_key = Config::get('security.csrf_token_key');
+            $view->set('token', $token_key);
 
             $this->template->content = $view;
         }
@@ -162,7 +156,6 @@ use Fuel\Core\View;
         }
 
         public function action_index() {
-            // create the view object
             $view = View::forge('pandachord/index');
             $view->set('pageTitle', 'pandaChord Home', true);
 
@@ -194,15 +187,11 @@ use Fuel\Core\View;
 
         public function action_song($id) {
             $view = View::forge('pandachord/song');
-            // $view->set('pageTitle', 'Chord and Lyrics', true);
-
-            // $data = array();
-            // $data['songs'] = Model_Songs::find($id);
-            // $view->set('data', $data);
 
             $song = Model_Songs::find($id);
             $view->set('song', $song);
 
+            // 変数名
             $addSongUser = $song['user_name'];
             $loggedInUser = Auth::get_screen_name();
             $LoggedInCheck = ($addSongUser == $loggedInUser);
@@ -237,7 +226,6 @@ use Fuel\Core\View;
 
         public function action_tag($tag) {
             $view = View::forge('pandachord/tag');
-            // $view->set('pageTitle', '#tagName', true);
 
             $data = array();
             $data['pageTitle'] = $tag;
@@ -275,7 +263,6 @@ use Fuel\Core\View;
             $action = 'pandachord/create_chord';
             $view->set('action', $action);
             
-            // $artists = array('test', 'test2', 'test3');
             $data = array();
             $data['artists'] = Model_Artists::find('all');
             foreach ($data['artists'] as $artist) {
@@ -296,10 +283,8 @@ use Fuel\Core\View;
 
             $view->set('song', $default);
 
-            $token['key'] = Config::get('security.csrf_token_key');
-            $token['token'] = Security::fetch_token();
-            // Log::error('token' . print_r($token, true));
-            $view->set('token', $token);
+            $token_key = Config::get('security.csrf_token_key');
+            $view->set('token', $token_key);
 
             $this->template->content = $view;
         }

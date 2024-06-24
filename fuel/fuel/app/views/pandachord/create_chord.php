@@ -1,9 +1,11 @@
 <?php
 use Fuel\Core\Form;
+use Fuel\Core\Security;
 use Fuel\Core\Session;
 
 echo Form::open(array('action' => $action, 'method' => 'post'));
-echo Form::hidden($token['key'], $token['token']);
+echo Security::js_fetch_token();
+
 
 ?>
 
@@ -88,10 +90,8 @@ echo Form::hidden($token['key'], $token['token']);
                         ?>
                     </div>
                     <div class="col-sm-12">
-                        <?php
-                            echo Form::button('frmbutton', 'Submit', array('class' => 'btn btn-secondary'));
-                        ?>
-
+                        <?php echo Form::hidden($token, '', array('id' => 'csrf_token')); ?>
+                        <?php echo Form::button('frmbutton', 'Submit', array('class' => 'btn btn-secondary')); ?>
                         <?php echo Form::close() ?>
                     </div>
                 </div>
@@ -99,3 +99,9 @@ echo Form::hidden($token['key'], $token['token']);
         </div>
     </div>
 </div>
+
+
+<script type="text/javascript">
+    let current_token = fuel_csrf_token();
+    document.getElementById('csrf_token').value = current_token;
+</script>
