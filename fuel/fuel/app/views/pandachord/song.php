@@ -23,7 +23,7 @@ use Fuel\Core\Uri;
                         <div class="col-6">
 
                             <div data-bind="if: !isEditingLyrics()">
-                                <div data-bind="if: loggedIn">
+                                <div data-bind="if: isAuthor">
                                     <button data-bind="click: startEditingLyrics" class="mb-3">Edit only Lyrics</button>
                                 </div>
                                 <p data-bind="newLineToBr: song().lyrics"></p>
@@ -39,7 +39,7 @@ use Fuel\Core\Uri;
                         </div>
                         <div class="col-6">
                             <div data-bind="if: !isEditingChord()">
-                                <div data-bind="if: loggedIn">
+                                <div data-bind="if: isAuthor">
                                     <button data-bind="click: startEditingChord" class="mb-3">Edit only Chord</button>
                                 </div>
                                 <p data-bind="newLineToBr: song().chord"></p>
@@ -62,7 +62,7 @@ use Fuel\Core\Uri;
                         <div class="col-xs-12">
 
                             <div data-bind="if: !isEditingMemo()">
-                                <div data-bind="if: loggedIn">
+                                <div data-bind="if: isAuthor">
                                     <button data-bind="click: startEditingMemo" class="mb-3">Edit only Memo</button>
                                 </div>
                                 <p data-bind="newLineToBr: song().memo"></p>
@@ -76,7 +76,7 @@ use Fuel\Core\Uri;
                             </div>
 
                         </div>
-                        <div class="row p-0" data-bind="if: loggedIn">
+                        <div class="row p-0" data-bind="if: isAuthor">
                             <button data-bind="click: save" class="my-5">Save All Changes</button>
 
                             <a class="btn btn-secondary mt-3" data-bind="attr: { href: baseUrl + 'pandachord/edit/' + song().id() }">Edit</a>
@@ -104,11 +104,11 @@ use Fuel\Core\Uri;
     // console.log(baseUrl); 
 
 
-    function SongViewModel(initialData, LoggedIn) {
+    function SongViewModel(initialData, isAuthor) {
         var self = this;
 
         self.song = ko.observable(ko.mapping.fromJS(initialData));
-        self.loggedIn = ko.observable(LoggedIn);
+        self.isAuthor = ko.observable(isAuthor);
         // console.log(self.loggedIn);
         self.originalData = ko.observable();
         // console.log(self.song());
@@ -193,9 +193,9 @@ use Fuel\Core\Uri;
     $(document).ready(function() {
         var initialData = <?php echo json_encode($song->to_array(), JSON_UNESCAPED_UNICODE); ?>;
         // console.log(initialData);
-        var LoggedIn = <?php echo json_encode($LoggedInCheck); ?>;
-        console.log(LoggedIn);
-        var viewModel = new SongViewModel(initialData, LoggedIn);
+        var isAuthor = <?php echo json_encode($author_check); ?>;
+        console.log(isAuthor);
+        var viewModel = new SongViewModel(initialData, isAuthor);
         ko.applyBindings(viewModel, document.getElementById("songDetails"));
     });
 

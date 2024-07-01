@@ -46,7 +46,6 @@ echo Security::js_fetch_token();
             </script>
         ';
 
-        // 改行を追加
         echo '<br>';
     ?>
 </h4>

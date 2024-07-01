@@ -29,6 +29,7 @@ echo Security::js_fetch_token();
                 echo Form::input('password', null, array('id' => 'password','class' => 'form-control'));
             ?>
         </div>
+        <?php echo Form::hidden($token, '', array('id' => 'csrf_token')); ?>
         <?php echo Form::button('submit', 'Log in', array('class' => 'btn btn-secondary')); ?>
         <?php echo Form::close(); ?>
     </div>

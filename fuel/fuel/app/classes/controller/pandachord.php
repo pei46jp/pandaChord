@@ -192,10 +192,10 @@ use Fuel\Core\View;
             $view->set('song', $song);
 
             // 変数名
-            $addSongUser = $song['user_name'];
-            $loggedInUser = Auth::get_screen_name();
-            $LoggedInCheck = ($addSongUser == $loggedInUser);
-            $view->set('LoggedInCheck', $LoggedInCheck);
+            $add_song_user = $song['user_name'];
+            $logged_in_user = Auth::get_screen_name();
+            $author_check = ($add_song_user == $logged_in_user);
+            $view->set('author_check', $author_check);
 
             $this->template->content = $view;
         }
@@ -412,7 +412,6 @@ use Fuel\Core\View;
 
             $song->set($edited);
 
-            // $song->save();
             if ($song->save()) {
                 // Log::error('save success');
                 Response::redirect('pandachord/song/'.$id);

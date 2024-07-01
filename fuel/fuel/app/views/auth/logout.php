@@ -17,6 +17,7 @@ echo Security::js_fetch_token();
 
 <div class="container py-3 my-5">
     <div class="container">
+        <?php echo Form::hidden($token, '', array('id' => 'csrf_token')); ?>
         <?php echo Form::button('submit', 'Log out', array('class' => 'btn btn-secondary')); ?>
         <?php echo Form::close(); ?>
     </div>
