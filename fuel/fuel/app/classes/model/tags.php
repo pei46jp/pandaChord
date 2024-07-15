@@ -1,6 +1,7 @@
 <?php
 
 use Fuel\Core\Date;
+use Fuel\Core\DB;
 use Orm\Model;
 
     class Model_Tags extends Model {
@@ -41,5 +42,13 @@ use Orm\Model;
         protected static function _pre_update($data) {
             $data['updated_at'] = Date::time()->format('%Y-%m-%d %H:%M:%S');
             return $data;
+        }
+
+        public static function get_id_by_tag($tag) {
+            return DB::select('id')->from(self::$_table_name)->where('tag_name', '=', $tag)->execute()->current();
+        }
+
+        public static function get_tag_names() {
+            return DB::select('tag_name')->from(self::$_table_name)->execute();
         }
     }

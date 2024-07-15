@@ -202,26 +202,25 @@ use Fuel\Core\View;
 
         public function action_delete_song($id) {
             $song = Model_Songs::find($id);
-            $mem_artist = $song['artist_name'];
+            $song_artist_name = $song['artist_name'];
 
-            $loggedInUser = Auth::get_screen_name();
-            $songCreateUser = $song['user_name'];
+            $logged_in_user = Auth::get_screen_name();
+            $song_create_user = $song['user_name'];
 
-            if ($loggedInUser == $songCreateUser) {
-                if (!$song) {
-                    Session::set_flash('message', 'Song not found');
+            if ($logged_in_user == $song_create_user) {
+                // DB::delete('songs')->where('id', '=', $id)->execute();
+                $deleted = Model_Songs::delete_song_by_id($id);
+                if ($deleted) {
+                    Session::set_flash('message', 'Deleted.');
+                    Response::redirect('pandachord/artist/'.$song_artist_name);
+                } else {
+                    Session::set_flash('message', 'Failed.');
                     Response::redirect('pandachord/song/'.$id);
                 }
-
-                DB::delete('songs')->where('id', '=', $id)->execute();
-
-                Session::set_flash('success', 'Deleted');
-                Response::redirect('pandachord/artist/'.$mem_artist);
             } else {
                 Session::set_flash('message', 'この楽曲を削除する権限がありません．');
                 Response::redirect('pandachord/song/'.$id);
             }
-            
         }
 
         public function action_tag($tag) {
@@ -235,10 +234,22 @@ use Fuel\Core\View;
                 return $tg->to_array();
             }, $tags);
 
-            $tag_id = DB::select('id')->from('tags')->where('tag_name', '=', $tag)->execute()->current();
-            $song_ids = DB::select('song_id')->from('have_tags')->where('tag_id', '=', $tag_id)->execute()->current();
+            // $tag_id = DB::select('id')->from('tags')->where('tag_name', '=', $tag)->execute()->current();
+            $tag_id = Model_Tags::get_id_by_tag($tag);
+            // $song_ids = DB::select('song_id')->from('have_tags')->where('tag_id', '=', $tag_id)->execute()->current();
+            $song_ids = Model_HaveTags::get_song_id_by_tag_id($tag_id);
             if (!empty($song_ids)) {
-                $songs = DB::select()->from('songs')->where('id', 'in', $song_ids)->execute()->as_array();
+                // $songs = DB::select()->from('songs')->where('id', 'in', $song_ids)->execute()->as_array();
+                $songs = Model_Songs::get_songs_by_ids($song_ids);
+
+                // 一応 foreach で回せるようにも。
+                // $songs = array();
+                // foreach ($song_ids as $song_id) {
+                //     $song = Model_Songs::get_song_by_id($song_id);
+                //     if (!empty($song)) {
+                //         array_push($songs, $song);
+                //     }
+                // }
             } else {
                 $songs = [];
                 Session::set_flash("No data in #" . $tag);
@@ -270,7 +281,8 @@ use Fuel\Core\View;
             }
             $view->set('artist_names', $artist_names);
 
-            $tags = DB::select('tag_name')->from('tags')->execute();
+            // $tags = DB::select('tag_name')->from('tags')->execute();
+            $tags = Model_Tags::get_tag_names();
             $view->set('tags', $tags);
 
             $default = array(
@@ -330,7 +342,8 @@ use Fuel\Core\View;
             try {
                 if (is_array($selected_tags) && !empty($selected_tags)) {
                     foreach ($selected_tags as $tag) {
-                        $tag_id = DB::select('id')->from('tags')->where('tag_name', '=', $tag)->execute()->current();
+                        // $tag_id = DB::select('id')->from('tags')->where('tag_name', '=', $tag)->execute()->current();
+                        $tag_id = Model_Tags::get_id_by_tag($tag);
                         if ($tag_id) {
                             $add_tag = array(
                                 'tag_id' => $tag_id['id'],
@@ -372,7 +385,8 @@ use Fuel\Core\View;
             $view->set('action', $action);
             // Log::error(print_r($song), true);
 
-            $tags = DB::select('tag_name')->from('tags')->execute();
+            // $tags = DB::select('tag_name')->from('tags')->execute();
+            $tags = Model_Tags::get_tag_names();
             // Log::error(print_r($tags, true));
             $view->set('tags', $tags);
 
@@ -383,11 +397,20 @@ use Fuel\Core\View;
             }
             $view->set('artist_names', $artist_names);
 
+            $token_key = Config::get('security.csrf_token_key');
+            $view->set('token', $token_key);
+
             $this->template->content = $view;
 
         }
 
         public function post_edit($id) {
+
+            if (!Security::check_token()) {
+                Session::set_flash('error', 'Token mismatch.');
+                Response::redirect('pandachord/song/'.$id);
+            }
+
             $song = Model_Songs::find($id);
             $edited = array(
                 'title' => Input::post('title'),
@@ -411,11 +434,42 @@ use Fuel\Core\View;
             }
 
             $song->set($edited);
+            $song->save();
 
-            if ($song->save()) {
-                // Log::error('save success');
-                Response::redirect('pandachord/song/'.$id);
+            $selected_tags = Input::post('tags', array());
+            // 新たにタグがセレクトされていたら
+            if (!empty($selected_tags)) {
+                $query = Model_HaveTags::delete_by_song_id($id);
+
+                try {
+                    if (is_array($selected_tags) && !empty($selected_tags)) {
+                        foreach ($selected_tags as $tag) {
+                            $tag_id = Model_Tags::get_id_by_tag($tag);
+                            if ($tag_id) {
+                                $add_tag = array(
+                                    'tag_id' => $tag_id['id'],
+                                    'song_id' => $id,
+                                );
+    
+                                $haveTag = new Model_HaveTags();
+                                $haveTag->tag_id = $add_tag['tag_id'];
+                                $haveTag->song_id = $add_tag['song_id'];
+                                $haveTag->save();
+                            } else {
+                                Log::error('tag not found: ' . $tag);
+                            }
+                        }
+                    } else {
+                        Log::error('selected tags are null or empty');
+                    }
+                } catch (Exception $e) {
+                    Log::error('An error occurred:' . $e->getMessage());
+                    throw $e;
+                }
             }
+            
+            Response::redirect('pandachord/song/'.$id);
+
         }
 
     }

@@ -1,6 +1,7 @@
 <?php
 
 use Fuel\Core\Date;
+use Fuel\Core\DB;
 use Orm\Model;
 
     class Model_Songs extends Model {
@@ -83,4 +84,17 @@ use Orm\Model;
                 'key_to' => 'id',
             ),
         );
+
+        public static function delete_song_by_id($id) {
+            return DB::delete(self::$_table_name)->where('id', '=', $id)->execute();
+        }
+
+        public static function get_songs_by_ids($ids) {
+            return DB::select()->from(self::$_table_name)->where('id', 'in', $ids)->execute()->as_array();
+        }
+
+        public static function get_song_by_id($id) {
+            return DB::select()->from(self::$_table_name)->where('id', '=', $id)->execute()->as_array();
+        }
+
     }
