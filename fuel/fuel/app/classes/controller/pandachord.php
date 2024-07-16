@@ -252,7 +252,7 @@ use Fuel\Core\View;
                 // }
             } else {
                 $songs = [];
-                Session::set_flash("No data in #" . $tag);
+                // Session::set_flash("No data in #" . $tag);
             }
             $data['songs'] = array_values($songs);
 
