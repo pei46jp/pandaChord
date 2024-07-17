@@ -54,7 +54,7 @@ use Orm\Model;
         );
 
         public static function get_song_id_by_tag_id($tag_id) {
-            return DB::select('song_id')->from(self::$_table_name)->where('tag_id', '=', $tag_id)->execute()->current();
+            return DB::select('song_id')->from(self::$_table_name)->where('tag_id', '=', $tag_id)->execute()->as_array();
         }
 
         public static function delete_by_song_id($song_id) {

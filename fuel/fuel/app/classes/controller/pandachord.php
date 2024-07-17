@@ -15,6 +15,39 @@ use Fuel\Core\View;
     class Controller_Pandachord extends Controller_Template{
         public $template = 'layout';
 
+        public function before() {
+            parent::before();
+
+            Config::load('pandachord');
+            $app_info = Config::get('app');
+
+            if (Auth::check()) {
+                $right_nav = array(
+                    array(
+                        Auth::get_screen_name(),
+                        Uri::create('pandachord/index/')
+                    ),
+                    array(
+                        'logout',
+                        Uri::create('pandachord/logout/')
+                    )
+                );
+            } else {
+                $right_nav = array(
+                    array(
+                        'Sign Up',
+                        Uri::create('pandachord/register')
+                    ),
+                    array(
+                        'Log in',
+                        Uri::create('pandachord/login/')
+                    )
+                );
+            }
+
+            $this->template->set_global('app_info', $app_info);
+            $this->template->set_global('nav_info', $right_nav);
+        }
         public function get_register() {
             $view = View::forge('auth/register');
             $view->set('pageTitle', 'Sign Up', true);
@@ -123,36 +156,6 @@ use Fuel\Core\View;
                     Response::redirect('pandachord/logout');
                 }
             }
-        }
-
-        public function before() {
-            parent::before();
-
-            if (Auth::check()) {
-                $right_nav = array(
-                    array(
-                        Auth::get_screen_name(),
-                        Uri::create('pandachord/index/')
-                    ),
-                    array(
-                        'logout',
-                        Uri::create('pandachord/logout/')
-                    )
-                );
-            } else {
-                $right_nav = array(
-                    array(
-                        'Sign Up',
-                        Uri::create('pandachord/register')
-                    ),
-                    array(
-                        'Log in',
-                        Uri::create('pandachord/login/')
-                    )
-                );
-            }
-
-            $this->template->set_global('nav_info', $right_nav);
         }
 
         public function action_index() {
