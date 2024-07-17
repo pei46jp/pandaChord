@@ -1,6 +1,7 @@
 <?php
 
 use Fuel\Core\Date;
+use Fuel\Core\DB;
 use Orm\Model;
 
     class Model_HaveTags extends Model {
@@ -26,15 +27,9 @@ use Orm\Model;
             'song_id' => array(
                 'data_type' => 'int',
             ),
-            'created_at' => array(
-                'data_type' => 'datetime'
-            ),
-            'updated_at' => array(
-                'data_type' => 'datetime'
-            ),
-            'deleted_at' => array(
-                'data_type' => 'datetime'
-            )
+            'created_at',
+            'updated_at',
+            'deleted_at'
         );
 
         protected static $_soft_delete = array(
@@ -53,8 +48,16 @@ use Orm\Model;
                 'key_from' => 'song_id',
                 'model_to' => 'Model_Songs',
                 'key_to' => 'id',
-                'cascade_save' => false,
+                'cascade_save' => true,
                 'cascade_delete' => false,
             )
         );
+
+        public static function get_song_id_by_tag_id($tag_id) {
+            return DB::select('song_id')->from(self::$_table_name)->where('tag_id', '=', $tag_id)->execute()->as_array();
+        }
+
+        public static function delete_by_song_id($song_id) {
+            return DB::delete(self::$_table_name)->where('song_id', '=', $song_id)->execute();
+        }
     }

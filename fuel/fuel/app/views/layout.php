@@ -21,7 +21,7 @@ use Fuel\Core\Uri;
         <header>
             <nav class="navbar navbar-expand-lg navbar-light py-3" style="background-color: #008F7E;">
                 <div class="container-fluid">
-                    <a class="navbar-brand" href="<?php echo Uri::create('pandachord/'); ?>">PandaChord</a>
+                    <a class="navbar-brand" href="<?php echo Uri::create('pandachord/'); ?>"><?php echo $app_info['name']; ?></a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
@@ -57,7 +57,10 @@ use Fuel\Core\Uri;
         <footer class="footer mt-auto text-center p-1" style="background-color: #008F7E;">
             <div class="container my-2">
                 <p class="text-center" style="color: #ffffff;">
-                    ©︎ 2024 pei46jp<br>
+                    ©︎ 2024 pei46jp
+                </p>
+                <p class="text-center m-0 p-0" style="color: #cccccc;">
+                    v<?php echo $app_info['version']; ?>
                 </p>
             </div>
         </footer>
